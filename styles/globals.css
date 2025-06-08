@@ -53,3 +53,7 @@ table {
 th, td {
   @apply border border-grey-light p-2;
 }
+
+.welcome-message {
+  @apply p-4 m-4 bg-grey-dark rounded-lg text-beige-accent text-center;
+}
