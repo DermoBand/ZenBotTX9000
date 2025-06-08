@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,14 +10,22 @@
     margin: 0;
     padding: 0;
     height: 100%;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    color: #d9c7a7;
-    font-family: 'Arial', sans-serif;
-    overflow-x: hidden;
+    font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
   }
 
   #__next {
     height: 100%;
+  }
+
+  .dark {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    color: #d9c7a7;
+  }
+
+  .light {
+    background: linear-gradient(135deg, #f0f0f0 0%, #ffffff 100%);
+    color: #1a1a1a;
   }
 
   .chat-container {
@@ -36,14 +46,19 @@
 
 @layer components {
   .glass-effect {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   }
 
-  .shadow-aaa {
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), 0 6px 6px rgba(0, 0, 0, 0.2);
+  .glass-effect-light {
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   }
 
   .text-gradient {
@@ -55,22 +70,10 @@
 }
 
 @layer utilities {
-  .bg-grey-dark {
-    background-color: #1a1a1a;
-  }
-  .bg-grey-medium {
-    background-color: #2d2d2d;
-  }
-  .bg-beige-accent {
-    background-color: #d9c7a7;
-  }
-  .text-grey-light {
-    color: #d9c7a7;
-  }
-  .text-beige-accent {
-    color: #d9c7a7;
-  }
-  .border-grey-medium {
-    border-color: #2d2d2d;
-  }
+  .bg-grey-dark { background-color: #1a1a1a; }
+  .bg-grey-medium { background-color: #2d2d2d; }
+  .bg-beige-accent { background-color: #d9c7a7; }
+  .text-grey-light { color: #d9c7a7; }
+  .text-beige-accent { color: #d9c7a7; }
+  .border-grey-medium { border-color: #2d2d2d; }
 }
