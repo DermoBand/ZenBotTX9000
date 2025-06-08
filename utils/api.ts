@@ -41,6 +41,8 @@ export const streamResponse = async (
   onChunk: (chunk: string, type: 'reasoning' | 'response') => void,
   signal: AbortSignal
 ) => {
+  // Streams chat responses from the OpenRouter API.
+  // Handles parsing Server-Sent Events (SSE) and calling onChunk with content.
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -70,15 +72,18 @@ export const streamResponse = async (
       buffer = buffer.split('\n').slice(lines.length).join('\n');
 
       for (const line of lines) {
-        if (line === 'data: [DONE]') continue;
+        if (line === 'data: [DONE]') continue; // End of stream signal
         try {
           const data = JSON.parse(line.replace('data: ', ''));
           if (data.choices[0].delta.content) {
             const content = data.choices[0].delta.content;
+            // Basic type differentiation (can be made more robust if needed)
             const type = content.includes('**Reasoning**') ? 'reasoning' : 'response';
             onChunk(content, type);
           }
-        } catch {}
+        } catch (e) {
+          // console.error('Error parsing stream data:', e); // Optional: log parsing errors for debugging
+        }
       }
     }
   } catch (error: any) {

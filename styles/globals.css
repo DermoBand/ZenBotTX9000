@@ -5,12 +5,15 @@
 @tailwind utilities;
 
 @layer base {
-  html,
+  html {
+    height: 100%; /* Ensure html also has height 100% */
+  }
   body {
+    @apply bg-background-light text-text-primary-light dark:bg-background-dark dark:text-text-primary-dark;
+    font-family: theme('fontFamily.sans'); /* Apply the default sans-serif font stack */
     margin: 0;
     padding: 0;
     height: 100%;
-    font-family: 'Inter', sans-serif;
     scroll-behavior: smooth;
   }
 
@@ -18,15 +21,7 @@
     height: 100%;
   }
 
-  .dark {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    color: #d9c7a7;
-  }
-
-  .light {
-    background: linear-gradient(135deg, #f0f0f0 0%, #ffffff 100%);
-    color: #1a1a1a;
-  }
+  /* .dark and .light classes are removed as Tailwind's dark: variant handles this */
 
   .chat-container {
     height: 100vh;
@@ -45,35 +40,16 @@
 }
 
 @layer components {
-  .glass-effect {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  }
-
-  .glass-effect-light {
-    background: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  }
+  /* .glass-effect and .glass-effect-light are removed. Will be rebuilt with utility classes. */
 
   .text-gradient {
-    background: linear-gradient(45deg, #d9c7a7, #f5e6cc);
+    /* This can be kept if still desired, but ensure colors match new palette or are updated. */
+    /* For now, assuming it might be reused or updated later. */
+    background: linear-gradient(45deg, theme('colors.accent-light'), theme('colors.text-primary-dark')); /* Example update */
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 }
 
-@layer utilities {
-  .bg-grey-dark { background-color: #1a1a1a; }
-  .bg-grey-medium { background-color: #2d2d2d; }
-  .bg-beige-accent { background-color: #d9c7a7; }
-  .text-grey-light { color: #d9c7a7; }
-  .text-beige-accent { color: #d9c7a7; }
-  .border-grey-medium { border-color: #2d2d2d; }
-}
+/* @layer utilities are removed as direct Tailwind class usage is preferred. */
