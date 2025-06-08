@@ -32,12 +32,13 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw]}
         components={{
-          code({ node, inline, className, children, ...props }) {
+          code({ node, className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || '');
-            return !inline && match ? (
+            const isInline = node.tagName === 'code' && !match;
+            return !isInline ? (
               <div className="relative">
                 <SyntaxHighlighter
-                  language={match[1]}
+                  language={match ? match[1] : 'text'}
                   style={{
                     dark: {
                       background: '#2a2a2a',
