@@ -10,9 +10,10 @@ import { ChatMessage as MessageType } from '../utils/storage';
 interface ChatMessageProps {
   message: MessageType;
   onCopy: (text: string) => void;
+  theme: 'dark' | 'light';
 }
 
-export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
+export default function ChatMessage({ message, onCopy, theme }: ChatMessageProps) {
   const handleCopy = useCallback(() => {
     onCopy(message.content);
     const sound = new Audio('/copy.mp3');
@@ -24,9 +25,7 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`chat-message ${message.role} ${message.type || ''}`}
-      role="article"
-      aria-label={`${message.role} message`}
+      className={`p-4 rounded-lg m-2 max-w-[80%] relative ${theme === 'dark' ? 'glass-effect' : 'glass-effect-light'} ${message.role === 'user' ? 'self-end' : 'self-start'}`}
     >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
@@ -41,7 +40,7 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
                   code={String(children).replace(/\n$/, '')}
                   language={match ? match[1] : 'text'}
                   theme={{
-                    plain: { background: '#2a2a2a', color: '#f5e6cc' },
+                    plain: { background: theme === 'dark' ? '#2a2a2a' : '#f0f0f0', color: theme === 'dark' ? '#f5e6cc' : '#1a1a1a' },
                     styles: [],
                   }}
                 >
@@ -60,27 +59,15 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
                 <button
                   onClick={handleCopy}
                   className="absolute top-2 right-2 text-beige-accent"
-                  aria-label="Copy code"
                 >
                   <FaCopy />
                 </button>
               </div>
             ) : (
-              <code className="bg-grey-medium p-1 rounded" {...props}>
+              <code className={`p-1 rounded ${theme === 'dark' ? 'bg-grey-medium' : 'bg-grey-light'}`} {...props}>
                 {children}
               </code>
             );
-          },
-          table({ children }) {
-            return (
-              <table className="border-collapse border border-grey-light my-2 w-full">{children}</table>
-            );
-          },
-          th({ children }) {
-            return <th className="border border-grey-light p-2">{children}</th>;
-          },
-          td({ children }) {
-            return <td className="border border-grey-light p-2">{children}</td>;
           },
         }}
       >
@@ -89,7 +76,6 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
       <button
         onClick={handleCopy}
         className="text-beige-accent mt-2"
-        aria-label="Copy message"
       >
         <FaCopy />
       </button>
