@@ -34,7 +34,7 @@ export default function ChatMessage({ message, onCopy }: ChatMessageProps) {
         components={{
           code({ node, className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || '');
-            const isInline = node.tagName === 'code' && !match;
+            const isInline = node && node.tagName === 'code' && !match;
             return !isInline ? (
               <div className="relative">
                 <SyntaxHighlighter
