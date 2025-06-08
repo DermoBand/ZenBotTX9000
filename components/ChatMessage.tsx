@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { Prism as SyntaxHighlighter } from 'prism-react-renderer';
 import { useCallback } from 'react';
-import { ChatMessage as MessageType } from '@utils/storage';
+import { ChatMessage as MessageType } from '../utils/storage';
 
 interface ChatMessageProps {
   message: MessageType;

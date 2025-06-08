@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import { useState, useCallback } from 'react';
-import { fetchModels } from '@utils/api';
+import { fetchModels, checkApiKey } from '../utils/api';
+import { saveToStorage } from '../utils/storage';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -41,28 +42,33 @@ export default function Sidebar({
   const [newModel, setNewModel] = useState('');
   const [suggestedModels, setSuggestedModels] = useState<string[]>([]);
   const [error, setError] = useState('');
+  const [isFetchingModels, setIsFetchingModels] = useState(false);
 
   const handleFetchModels = useCallback(async () => {
+    setIsFetchingModels(true);
     const models = await fetchModels(apiKey);
     setSuggestedModels(models);
+    setIsFetchingModels(false);
   }, [apiKey]);
 
   const addCustomModel = useCallback(() => {
     if (newModel && !customModels.includes(newModel)) {
-      setCustomModels([...customModels, newModel]);
+      const updatedModels = [...customModels, newModel];
+      setCustomModels(updatedModels);
+      saveToStorage('zenbot', { version: 1, apiKey, messages: [], customModels: updatedModels });
       setNewModel('');
     }
-  }, [newModel, customModels, setCustomModels]);
+  }, [newModel, customModels, setCustomModels, apiKey]);
 
   const handleApiKeySave = useCallback(async () => {
     const isValid = await checkApiKey(apiKey, model);
     if (!isValid) {
-      setError('Invalid API key or model unavailable.');
+      setError('Invalid API key or model unavailable. Visit https://openrouter.ai to get a valid key.');
       return;
     }
     setError('');
-    localStorage.setItem('openRouterApiKey', apiKey);
-  }, [apiKey, model]);
+    saveToStorage('zenbot', { version: 1, apiKey, messages: [], customModels });
+  }, [apiKey, model, customModels]);
 
   return (
     <AnimatePresence>
@@ -96,12 +102,14 @@ export default function Sidebar({
               onChange={(e) => setApiKey(e.target.value)}
               className="w-full p-2 rounded bg-grey-medium text-grey-light"
               placeholder="Paste your OpenRouter API key"
+              aria-label="API key input"
             />
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleApiKeySave}
               className="mt-2 px-4 py-2 bg-beige-accent text-grey-dark rounded"
+              aria-label="Save API key"
             >
               Save Key
             </motion.button>
@@ -119,6 +127,7 @@ export default function Sidebar({
               value={model}
               onChange={(e) => setModel(e.target.value)}
               className="w-full p-2 rounded bg-grey-medium text-grey-light"
+              aria-label="Select model"
             >
               <option value="deepseek-r1:0528">DeepSeek-R1 (0528)</option>
               {customModels.map((m) => (
@@ -133,8 +142,10 @@ export default function Sidebar({
               whileTap={{ scale: 0.95 }}
               onClick={handleFetchModels}
               className="mt-2 px-4 py-2 bg-beige-accent text-grey-dark rounded"
+              disabled={isFetchingModels}
+              aria-label="Fetch free models"
             >
-              Fetch Free Models
+              {isFetchingModels ? 'Fetching...' : 'Fetch Free Models'}
             </motion.button>
           </div>
           <div className="mb-4">
@@ -146,6 +157,7 @@ export default function Sidebar({
               onKeyDown={(e) => e.key === 'Enter' && addCustomModel()}
               className="w-full p-2 rounded bg-grey-medium text-grey-light"
               placeholder="e.g., provider/model:version"
+              aria-label="Add custom model"
             />
             <p className="text-sm text-grey-light mt-1">
               Find models at{' '}
@@ -165,6 +177,7 @@ export default function Sidebar({
               onChange={(e) => setSystemPrompt(e.target.value)}
               className="w-full p-2 rounded bg-grey-medium text-grey-light"
               rows={3}
+              aria-label="System prompt"
             />
           </div>
           <div className="mb-4">
@@ -176,6 +189,7 @@ export default function Sidebar({
               className="w-full p-2 rounded bg-grey-medium text-grey-light"
               min={100}
               max={16384}
+              aria-label="Max tokens"
             />
           </div>
           <div className="mb-4">
@@ -188,6 +202,7 @@ export default function Sidebar({
               min={0}
               max={1}
               step={0.1}
+              aria-label="Sound volume"
             />
           </div>
           <div className="mb-4">
@@ -198,6 +213,7 @@ export default function Sidebar({
                 if (confirm('Clear chat history?')) clearChat();
               }}
               className="px-4 py-2 bg-red-600 text-grey-light rounded"
+              aria-label="Clear chat history"
             >
               <FaTrash className="inline mr-2" /> Clear Chat
             </motion.button>
