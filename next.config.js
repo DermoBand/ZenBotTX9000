@@ -4,6 +4,9 @@ const nextConfig = {
   images: {
     unoptimized: true, // For Vercel compatibility with Median.io
   },
+  typescript: {
+    ignoreBuildErrors: false, // Ensure TypeScript errors fail the build
+  },
 };
 
 module.exports = nextConfig;
