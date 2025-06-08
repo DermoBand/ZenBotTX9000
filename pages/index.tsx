@@ -21,6 +21,7 @@ const TypingIndicator = () => (
 );
 
 export default function Home() {
+  console.log('Home component initializing...');
   const [apiKey, setApiKey] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -37,41 +38,57 @@ export default function Home() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const stored = loadFromStorage<StorageSchema>('zenbot');
-    if (stored && stored.version === 1) {
-      setApiKey(stored.apiKey || '');
-      setMessages(stored.messages || []);
-      setCustomModels(stored.customModels || []);
-    }
-    if (!stored) {
-      setMessages([
-        {
-          role: 'assistant',
-          content: 'Welcome to ZenBotTX9000! Enter your OpenRouter API key to start chatting. Get your free key from [OpenRouter.ai](https://openrouter.ai).',
-          type: 'response',
-        },
-      ]);
+    console.log('Running useEffect for storage load...');
+    try {
+      const stored = loadFromStorage<StorageSchema>('zenbot');
+      if (stored && stored.version === 1) {
+        setApiKey(stored.apiKey || '');
+        setMessages(stored.messages || []);
+        setCustomModels(stored.customModels || []);
+      }
+      if (!stored) {
+        setMessages([
+          {
+            role: 'assistant',
+            content: 'Welcome to ZenBotTX9000! Enter your OpenRouter API key to start chatting. Get your free key from [OpenRouter.ai](https://openrouter.ai).',
+            type: 'response',
+          },
+        ]);
+      }
+    } catch (e) {
+      console.error('Error loading storage:', e);
+      setError('Failed to load saved data. Please try again.');
     }
   }, []);
 
   useEffect(() => {
     if (messages.length) {
-      saveToStorage('zenbot', { version: 1, apiKey, messages, customModels });
-      scroller.scrollTo('chat-bottom', {
-        containerId: 'chat-container',
-        smooth: true,
-        duration: 300,
-      });
+      console.log('Saving to storage and scrolling...');
+      try {
+        saveToStorage('zenbot', { version: 1, apiKey, messages, customModels });
+        scroller.scrollTo('chat-bottom', {
+          containerId: 'chat-container',
+          smooth: true,
+          duration: 300,
+        });
+      } catch (e) {
+        console.error('Error saving storage:', e);
+      }
     }
   }, [messages, apiKey, customModels]);
 
   const playSound = useCallback((src: string) => {
-    const sound = new Audio(src);
-    sound.volume = soundVolume;
-    sound.play().catch(() => {});
+    try {
+      const sound = new Audio(src);
+      sound.volume = soundVolume;
+      sound.play().catch((e) => console.error('Error playing sound:', e));
+    } catch (e) {
+      console.error('Error initializing sound:', e);
+    }
   }, [soundVolume]);
 
   const handleSend = useCallback(async () => {
+    console.log('Handling send...');
     if (!apiKey) {
       setError('Please enter your OpenRouter API key. Visit https://openrouter.ai to get one.');
       return;
@@ -114,6 +131,7 @@ export default function Home() {
         abortControllerRef.current.signal
       );
     } catch (error: any) {
+      console.error('Error streaming response:', error);
       setError(`Error: ${error.message || 'Failed to fetch response. Check your API key or network.'}`);
     } finally {
       setIsStreaming(false);
@@ -122,6 +140,7 @@ export default function Home() {
   }, [apiKey, model, messages, systemPrompt, maxTokens, input, playSound]);
 
   const togglePause = useCallback(() => {
+    console.log('Toggling pause...');
     if (isPaused) {
       setIsPaused(false);
     } else {
@@ -132,16 +151,19 @@ export default function Home() {
   }, [isPaused, playSound]);
 
   const clearChat = useCallback(() => {
+    console.log('Clearing chat...');
     setMessages([]);
     clearStorage('zenbot');
     playSound('/click.mp3');
   }, [playSound]);
 
   const handleCopy = useCallback((text: string) => {
+    console.log('Copying text...');
     navigator.clipboard.writeText(text);
     playSound('/copy.mp3');
   }, [playSound]);
 
+  console.log('Rendering Home component...');
   return (
     <div className="chat-container">
       <Sidebar
@@ -190,14 +212,20 @@ export default function Home() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={async () => {
-                const isValid = await checkApiKey(apiKey, model);
-                if (isValid) {
-                  saveToStorage('zenbot', { version: 1, apiKey, messages, customModels });
-                  setError('');
-                } else {
-                  setError('Invalid API key or model unavailable. Visit https://openrouter.ai to get a valid key.');
+                console.log('Saving API key...');
+                try {
+                  const isValid = await checkApiKey(apiKey, model);
+                  if (isValid) {
+                    saveToStorage('zenbot', { version: 1, apiKey, messages, customModels });
+                    setError('');
+                  } else {
+                    setError('Invalid API key or model unavailable. Visit https://openrouter.ai to get a valid key.');
+                  }
+                  playSound('/click.mp3');
+                } catch (e) {
+                  console.error('Error saving API key:', e);
+                  setError('Failed to save API key. Please try again.');
                 }
-                playSound('/click.mp3');
               }}
               className="mt-2 px-4 py-2 bg-beige-accent text-grey-dark rounded"
               aria-label="Save API key"
