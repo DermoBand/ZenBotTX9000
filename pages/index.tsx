@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaCog, FaPause, FaPlay } from 'react-icons/fa';
-import dynamic from 'next/dynamic';
 import { scroller } from 'react-scroll';
-import { saveToStorage, loadFromStorage, clearStorage, ChatMessage, StorageSchema } from '@utils/storage';
-import { streamResponse, checkApiKey } from '@utils/api';
-import ChatMessageComponent from '@components/ChatMessage';
-import Sidebar from '@components/Sidebar';
+import { saveToStorage, loadFromStorage, clearStorage, ChatMessage, StorageSchema } from '../utils/storage';
+import { streamResponse, checkApiKey } from '../utils/api';
+import ChatMessageComponent from '../components/ChatMessage';
+import Sidebar from '../components/Sidebar';
 
 const TypingIndicator = () => (
   <motion.div
@@ -44,6 +43,15 @@ export default function Home() {
       setMessages(stored.messages || []);
       setCustomModels(stored.customModels || []);
     }
+    if (!stored) {
+      setMessages([
+        {
+          role: 'assistant',
+          content: 'Welcome to ZenBotTX9000! Enter your OpenRouter API key to start chatting. Get your free key from [OpenRouter.ai](https://openrouter.ai).',
+          type: 'response',
+        },
+      ]);
+    }
   }, []);
 
   useEffect(() => {
@@ -65,7 +73,7 @@ export default function Home() {
 
   const handleSend = useCallback(async () => {
     if (!apiKey) {
-      setError('Please enter your OpenRouter API key.');
+      setError('Please enter your OpenRouter API key. Visit https://openrouter.ai to get one.');
       return;
     }
     if (!input.trim()) return;
@@ -106,7 +114,7 @@ export default function Home() {
         abortControllerRef.current.signal
       );
     } catch (error: any) {
-      setError(`Error: ${error.message || 'Failed to fetch response.'}`);
+      setError(`Error: ${error.message || 'Failed to fetch response. Check your API key or network.'}`);
     } finally {
       setIsStreaming(false);
       abortControllerRef.current = null;
@@ -187,7 +195,7 @@ export default function Home() {
                   saveToStorage('zenbot', { version: 1, apiKey, messages, customModels });
                   setError('');
                 } else {
-                  setError('Invalid API key or model unavailable.');
+                  setError('Invalid API key or model unavailable. Visit https://openrouter.ai to get a valid key.');
                 }
                 playSound('/click.mp3');
               }}
